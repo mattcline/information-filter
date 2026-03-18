@@ -1,0 +1,58 @@
+# Information Filter Configuration
+# Copy this file to config.yml and customize for your interests.
+
+# Primary goals driving relevance (highest weight in scoring)
+goals:
+  - "Stay current on AI/ML breakthroughs relevant to applied engineering"
+  - "Find tools and frameworks that improve developer productivity"
+
+# Topics to track
+topics:
+  primary:
+    - artificial intelligence
+    - machine learning
+    - large language models
+  secondary:
+    - developer tools
+    - open source
+
+# Keywords that boost an item's score (+0.5)
+boost_signals:
+  - breakthrough
+  - open source release
+  - benchmark
+
+# Keywords that auto-reject an item
+negative_signals:
+  - cryptocurrency
+  - NFT
+
+# Source-specific settings
+sources:
+  hacker_news:
+    enabled: true
+    top_stories_count: 30
+    include_best: true
+    min_score: 10
+    fetch_articles: true
+  linkedin:
+    enabled: true
+    feed_scroll_count: 30
+    profiles: []
+  x_twitter:
+    enabled: true
+    timeline_scroll_count: 30
+    accounts: []
+    lists: []
+
+# Display settings
+display:
+  max_items_per_source: 10
+  min_score: 5.0
+  group_by_topic: true
+
+# Trusted sources get a score boost
+trusted_sources:
+  hacker_news_users: []
+  linkedin_authors: []
+  x_accounts: []

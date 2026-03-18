@@ -124,17 +124,11 @@ Remove duplicate content that appeared across multiple sources.
    - Within each cluster, sort by `final_score` descending.
    - If `group_by_topic` is false, present as a flat list sorted by score.
 
-2. **Display each item** in this format:
+2. **Display each item** in this compact format:
 
    ```
-   ### {title}
-   **Score: {final_score}** | {source} | {author} | {age}
-
-   {summary — 2-3 sentences}
-
-   **Why relevant:** {1 sentence connecting to user's goals}
-
-   {url}
+   **{title}** ({final_score}) — {source} · {author} · {age}
+   {summary — 1 sentence} [Link]({url})
    ```
 
 3. **Scan stats** — at the end, show a summary:

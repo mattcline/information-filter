@@ -98,6 +98,7 @@ Agent-browser steps:
 4. **Extract post data** — from each snapshot, extract:
    - Author display name and @handle
    - Post text content (full text, not truncated)
+   - **Tweet permalink URL** — for each tweet article element, find the `<a>` element that contains a `<time>` element (this is the timestamp link that points to the tweet permalink). Extract its `href` attribute and construct the full URL as `https://x.com{href}` (the href is typically in the format `/{handle}/status/{tweet_id}`).
    - Any embedded URLs or linked articles
    - Media indicators (image, video, link card)
    - Engagement counts (likes, reposts, replies, views) if visible
@@ -138,7 +139,7 @@ From the raw captured data, produce a normalized list. For each post:
 
 ```
 - title: {first sentence or line of post text}
-  url: {link to the post on X, or embedded article URL}
+  url: {tweet permalink URL (e.g., https://x.com/handle/status/123), or embedded article URL}
   author: {display name} (@{handle})
   source: X/Twitter
   engagement: {likes/reposts/replies/views}

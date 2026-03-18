@@ -97,6 +97,7 @@ Agent-browser steps:
 3. **Extract post data** — from each snapshot, extract:
    - Author name and headline
    - Post text content
+   - **Post permalink URL** — for each post, extract the permalink by finding the `<a>` element whose `href` contains `/feed/update/` within the post's article element. Construct the full URL as `https://www.linkedin.com{href}`. If no permalink `<a>` is found, try extracting the `data-urn` attribute from the post's container element and construct the URL as `https://www.linkedin.com/feed/update/{urn}/`.
    - Any shared article URL and title
    - Engagement counts (likes, comments) if visible
    - Approximate post age (e.g., "2h", "1d")
@@ -120,7 +121,7 @@ From the raw captured data, produce a normalized list. For each post:
 
 ```
 - title: {first line of post or shared article title}
-  url: {shared article URL, or LinkedIn post URL if available}
+  url: {shared article URL, or LinkedIn post permalink URL}
   author: {author name}
   author_headline: {author headline/title}
   source: LinkedIn

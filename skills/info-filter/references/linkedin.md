@@ -8,7 +8,23 @@ LinkedIn requires authentication. Use agent-browser to log in, scroll the feed, 
 
 1. agent-browser installed locally: `npm install` in the plugin directory
 2. Chrome for Testing installed: `npx agent-browser install`
-3. LinkedIn credentials saved: `npx agent-browser auth save linkedin --url https://www.linkedin.com --username <email> --password <password>`
+3. LinkedIn session imported via browser:
+   ```bash
+   # Close all Chrome windows, then relaunch with remote debugging:
+   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222
+
+   # In that Chrome window, navigate to linkedin.com and log in normally
+   # (handle 2FA, CAPTCHAs, etc. as you normally would)
+
+   # Save state from Chrome to a temp file:
+   npx agent-browser --auto-connect state save /tmp/linkedin-auth.json
+
+   # Load into a named session (auto-persists across runs):
+   npx agent-browser --session-name linkedin state load /tmp/linkedin-auth.json
+
+   # Clean up temp file and close the debug Chrome window:
+   rm /tmp/linkedin-auth.json
+   ```
 
 ## Fetching Workflow
 
@@ -23,13 +39,18 @@ npx agent-browser --version
 If this fails, skip LinkedIn with the message:
 > "LinkedIn skipped — agent-browser not installed. Run `npm install` in the plugin directory, then `npx agent-browser install`."
 
-### Step 2: Launch Browser and Authenticate
+### Step 2: Launch Browser with Session
 
 ```bash
-npx agent-browser run --auth linkedin --url "https://www.linkedin.com/feed/" --steps '<steps>'
+npx agent-browser --session-name linkedin open "https://www.linkedin.com/feed/"
 ```
 
-The `--auth linkedin` flag loads saved credentials from the agent-browser vault.
+The `--session-name linkedin` flag restores saved cookies/state and auto-saves them back after each run.
+
+### Step 2a: Validate Auth
+
+After the page loads, check the current URL. If it contains `/login`, `/uas/login`, or `/authwall`, the session has expired. Skip LinkedIn with the message:
+> "LinkedIn skipped — session expired. Re-import your session by launching Chrome with `--remote-debugging-port=9222`, logging in to linkedin.com, then running `npx agent-browser --auto-connect state save /tmp/linkedin-auth.json` followed by `npx agent-browser --session-name linkedin state load /tmp/linkedin-auth.json`."
 
 ### Step 3: Scroll and Capture Feed
 
@@ -123,7 +144,7 @@ For each LinkedIn item that passes scoring:
 ## Error Handling
 
 - agent-browser not installed → skip with install instructions (see Step 1)
-- Auth not configured → skip with message: "LinkedIn skipped — no auth configured. Run `npx agent-browser auth save linkedin --url https://www.linkedin.com --username <email> --password <password>`"
-- Login fails / CAPTCHA → report: "LinkedIn login failed (possible CAPTCHA or credential issue). Skipping."
+- Session not configured → skip with message: "LinkedIn skipped — no session configured. Import your session by launching Chrome with `--remote-debugging-port=9222`, logging in to linkedin.com, then running `npx agent-browser --auto-connect state save /tmp/linkedin-auth.json` followed by `npx agent-browser --session-name linkedin state load /tmp/linkedin-auth.json`."
+- Session expired (redirected to login page) → skip with re-import instructions (see Step 2a)
 - Feed fails to load → report and skip
 - Individual profile page fails → skip that profile, continue with others

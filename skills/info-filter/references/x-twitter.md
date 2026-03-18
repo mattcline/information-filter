@@ -8,7 +8,23 @@ X requires authentication for timeline access. Use agent-browser to log in, scro
 
 1. agent-browser installed locally: `npm install` in the plugin directory
 2. Chrome for Testing installed: `npx agent-browser install`
-3. X credentials saved: `npx agent-browser auth save x --url https://x.com --username <handle> --password <password>`
+3. X session imported via browser:
+   ```bash
+   # Close all Chrome windows, then relaunch with remote debugging:
+   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222
+
+   # In that Chrome window, navigate to x.com and log in normally
+   # (handle 2FA, CAPTCHAs, etc. as you normally would)
+
+   # Save state from Chrome to a temp file:
+   npx agent-browser --auto-connect state save /tmp/x-auth.json
+
+   # Load into a named session (auto-persists across runs):
+   npx agent-browser --session-name x state load /tmp/x-auth.json
+
+   # Clean up temp file and close the debug Chrome window:
+   rm /tmp/x-auth.json
+   ```
 
 ## Fetching Workflow
 
@@ -23,13 +39,18 @@ npx agent-browser --version
 If this fails, skip X with the message:
 > "X/Twitter skipped — agent-browser not installed. Run `npm install` in the plugin directory, then `npx agent-browser install`."
 
-### Step 2: Launch Browser and Authenticate
+### Step 2: Launch Browser with Session
 
 ```bash
-npx agent-browser run --auth x --url "https://x.com/home" --steps '<steps>'
+npx agent-browser --session-name x open "https://x.com/home"
 ```
 
-The `--auth x` flag loads saved credentials from the agent-browser vault.
+The `--session-name x` flag restores saved cookies/state and auto-saves them back after each run.
+
+### Step 2a: Validate Auth
+
+After the page loads, check the current URL. If it contains `/login` or `/i/flow/login`, the session has expired. Skip X with the message:
+> "X/Twitter skipped — session expired. Re-import your session by launching Chrome with `--remote-debugging-port=9222`, logging in to x.com, then running `npx agent-browser --auto-connect state save /tmp/x-auth.json` followed by `npx agent-browser --session-name x state load /tmp/x-auth.json`."
 
 ### Step 3: Scroll and Capture Timeline
 
@@ -148,8 +169,8 @@ For each X item that passes scoring:
 ## Error Handling
 
 - agent-browser not installed → skip with install instructions (see Step 1)
-- Auth not configured → skip with message: "X/Twitter skipped — no auth configured. Run `npx agent-browser auth save x --url https://x.com --username <handle> --password <password>`"
-- Login fails / CAPTCHA → report: "X login failed (possible CAPTCHA or credential issue). Skipping."
+- Session not configured → skip with message: "X/Twitter skipped — no session configured. Import your session by launching Chrome with `--remote-debugging-port=9222`, logging in to x.com, then running `npx agent-browser --auto-connect state save /tmp/x-auth.json` followed by `npx agent-browser --session-name x state load /tmp/x-auth.json`."
+- Session expired (redirected to login page) → skip with re-import instructions (see Step 2a)
 - Timeline fails to load → report and skip
 - Individual account or list page fails → skip that account/list, continue with others
 - Rate limiting or temporary block → report and skip

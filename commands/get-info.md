@@ -58,7 +58,8 @@ Skip this phase if LinkedIn is not in the active source list or `sources.linkedi
 2. Check that agent-browser is available by running `npx agent-browser --version`.
    - If not available, record failure: "agent-browser not installed. Run `npm install` then `npx agent-browser install`." and skip to Phase 4.
 3. Follow the fetching workflow documented there:
-   - Launch agent-browser with LinkedIn auth
+   - Launch agent-browser with `--session-name linkedin`
+   - Validate auth (check for login redirect)
    - Scroll feed and capture posts
    - Check specific profiles if configured
    - Parse and normalize posts
@@ -78,7 +79,8 @@ Skip this phase if X is not in the active source list or `sources.x_twitter.enab
 2. Check that agent-browser is available (may already be confirmed from Phase 3).
    - If not available, record failure with install instructions and skip to Phase 5.
 3. Follow the fetching workflow documented there:
-   - Launch agent-browser with X auth
+   - Launch agent-browser with `--session-name x`
+   - Validate auth (check for login redirect)
    - Scroll timeline and capture posts
    - Check specific accounts and lists if configured
    - Parse and normalize posts
@@ -165,5 +167,5 @@ Report that no items passed the scoring threshold. Suggest:
 
 List each failure with its remediation instructions. Common fixes:
 - `npm install` + `npx agent-browser install` for agent-browser issues
-- Auth save commands for credential issues
+- Session import instructions for auth issues (launch Chrome with `--remote-debugging-port=9222`, log in, then use `npx agent-browser --auto-connect state save` + `npx agent-browser --session-name <name> state load`)
 - Check network connectivity for API failures

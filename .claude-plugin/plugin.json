@@ -1,0 +1,5 @@
+{
+  "name": "information-filter",
+  "version": "0.1.0",
+  "description": "Surface relevant information from LinkedIn, X, and Hacker News based on your goals and interests. Run /get-info to fetch, score, and rank content across sources."
+}

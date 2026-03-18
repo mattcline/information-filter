@@ -1,0 +1,9 @@
+{
+  "name": "information-filter",
+  "version": "0.1.0",
+  "description": "Claude Code plugin that surfaces relevant information from LinkedIn, X, and Hacker News based on your goals and interests.",
+  "private": true,
+  "dependencies": {
+    "@anthropic-ai/agent-browser": "latest"
+  }
+}

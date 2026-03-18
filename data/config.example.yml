@@ -21,6 +21,10 @@ boost_signals:
   - breakthrough
   - open source release
   - benchmark
+  - funding
+  - series a
+  - series b
+  - raised
 
 # Keywords that auto-reject an item
 negative_signals:
@@ -47,7 +51,7 @@ sources:
 
 # Display settings
 display:
-  max_items_per_source: 10
+  max_items_per_source: 3
   min_score: 5.0
   group_by_topic: true
 

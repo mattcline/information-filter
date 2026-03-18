@@ -10,21 +10,52 @@ LinkedIn requires authentication. Use agent-browser to log in, scroll the feed, 
 2. Chrome for Testing installed: `npx agent-browser install`
 3. LinkedIn session imported via browser:
    ```bash
-   # Close all Chrome windows, then relaunch with remote debugging:
-   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug-profile
+   # Quit Chrome entirely (Cmd+Q), then relaunch with remote debugging:
+   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+     --remote-debugging-port=9222 \
+     --user-data-dir=/tmp/chrome-debug-profile
 
    # In that Chrome window, navigate to linkedin.com and log in normally
    # (handle 2FA, CAPTCHAs, etc. as you normally would)
 
-   # Save state from Chrome to a temp file:
-   npx agent-browser --auto-connect state save /tmp/linkedin-auth.json
+   # In a separate terminal, extract the li_at cookie via CDP:
+   LI_AT=$(curl -s http://localhost:9222/json/version | node -e "
+     const http=require('http'),net=require('net'),crypto=require('crypto');
+     let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{
+       const wsUrl=JSON.parse(d).webSocketDebuggerUrl,url=new URL(wsUrl),
+         key=crypto.randomBytes(16).toString('base64'),
+         sock=net.connect(parseInt(url.port)||9222,url.hostname,()=>{
+           sock.write('GET '+url.pathname+' HTTP/1.1\r\nHost:'+url.host+
+             '\r\nUpgrade:websocket\r\nConnection:Upgrade\r\nSec-WebSocket-Key:'+
+             key+'\r\nSec-WebSocket-Version:13\r\n\r\n');
+         });
+       let hs=false,buf=Buffer.alloc(0);
+       sock.on('data',chunk=>{buf=Buffer.concat([buf,chunk]);
+         if(!hs){const i=buf.indexOf('\r\n\r\n');if(i>=0){hs=true;buf=buf.slice(i+4);
+           const msg=Buffer.from(JSON.stringify({id:1,method:'Storage.getCookies'})),
+             mask=crypto.randomBytes(4),fr=Buffer.alloc(6+msg.length);
+           fr[0]=0x81;fr[1]=0x80|msg.length;mask.copy(fr,2);
+           for(let j=0;j<msg.length;j++)fr[6+j]=msg[j]^mask[j%4];sock.write(fr);}}
+         else{if(buf.length>2){let pl=buf[1]&0x7f,o=2;
+           if(pl===126){pl=buf.readUInt16BE(2);o=4;}
+           if(buf.length>=o+pl){const r=JSON.parse(buf.slice(o,o+pl).toString());
+             if(r.id===1){const c=r.result.cookies.find(x=>x.name==='li_at');
+               if(c)process.stdout.write(c.value);process.exit(0);}}}}});
+       setTimeout(()=>process.exit(1),5000);
+     });")
 
-   # Load into a named session (auto-persists across runs):
-   npx agent-browser --session-name linkedin state load /tmp/linkedin-auth.json
+   # Close debug Chrome, then set cookie in agent-browser:
+   npx agent-browser --session-name linkedin open "about:blank"
+   npx agent-browser --session-name linkedin cookies set li_at "$LI_AT" \
+     --domain .linkedin.com --path / --httpOnly --secure --sameSite None
 
-   # Clean up temp file and close the debug Chrome window:
-   rm /tmp/linkedin-auth.json
+   # Verify — should show "Feed | LinkedIn", not a login page:
+   npx agent-browser --session-name linkedin open "https://www.linkedin.com/feed/"
    ```
+
+   > **Note:** The `state save` / `state load` workflow has a bug where it scopes
+   > cookie extraction to the wrong tab, producing empty cookies. The direct
+   > `cookies set` approach above bypasses this issue.
 
 ## Fetching Workflow
 
@@ -50,7 +81,7 @@ The `--session-name linkedin` flag restores saved cookies/state and auto-saves t
 ### Step 2a: Validate Auth
 
 After the page loads, check the current URL. If it contains `/login`, `/uas/login`, or `/authwall`, the session has expired. Skip LinkedIn with the message:
-> "LinkedIn skipped — session expired. Re-import your session by launching Chrome with `--remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug-profile`, logging in to linkedin.com, then running `npx agent-browser --auto-connect state save /tmp/linkedin-auth.json` followed by `npx agent-browser --session-name linkedin state load /tmp/linkedin-auth.json`."
+> "LinkedIn skipped — session expired. Re-import your session using the steps in `skills/info-filter/references/linkedin.md` under Prerequisites."
 
 ### Step 3: Scroll and Capture Feed
 
@@ -144,7 +175,7 @@ For each LinkedIn item that passes scoring:
 ## Error Handling
 
 - agent-browser not installed → skip with install instructions (see Step 1)
-- Session not configured → skip with message: "LinkedIn skipped — no session configured. Import your session by launching Chrome with `--remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug-profile`, logging in to linkedin.com, then running `npx agent-browser --auto-connect state save /tmp/linkedin-auth.json` followed by `npx agent-browser --session-name linkedin state load /tmp/linkedin-auth.json`."
+- Session not configured → skip with message: "LinkedIn skipped — no session configured. See `skills/info-filter/references/linkedin.md` Prerequisites for import steps."
 - Session expired (redirected to login page) → skip with re-import instructions (see Step 2a)
 - Feed fails to load → report and skip
 - Individual profile page fails → skip that profile, continue with others

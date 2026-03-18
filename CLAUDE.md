@@ -21,5 +21,5 @@ A Claude Code plugin that surfaces relevant information from LinkedIn, X, and Ha
 - `npm install` to get agent-browser locally
 - `npx agent-browser install` to download Chrome for Testing
 - Import LinkedIn session: launch Chrome with `--remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug-profile`, log in to linkedin.com, extract `li_at` cookie via CDP, then set it with `npx agent-browser --session-name linkedin cookies set` (see `skills/info-filter/references/linkedin.md` for full steps)
-- Import X session: same flow with x.com, using `--session-name x` (see `skills/info-filter/references/x-twitter.md` for details)
+- Import X session: same flow with x.com — extract `auth_token` cookie via CDP, then set with `npx agent-browser --session-name x cookies set` (see `skills/info-filter/references/x-twitter.md` for full steps)
 - Copy `data/config.example.yml` → `data/config.yml` and customize

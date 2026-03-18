@@ -12,4 +12,4 @@
 | 5 | X/Twitter source strategy | done |
 | 6 | Main /get-info command workflow | done |
 | 7 | End-to-end testing | done |
-| 8 | Create PR | todo |
+| 8 | Create PR | done |

@@ -8,7 +8,7 @@
 | 1 | Plugin registration + config templates | done |
 | 2 | Master strategy + scoring rubric | done |
 | 3 | Hacker News source strategy | done |
-| 4 | LinkedIn source strategy | todo |
+| 4 | LinkedIn source strategy | done |
 | 5 | X/Twitter source strategy | todo |
 | 6 | Main /get-info command workflow | todo |
 | 7 | End-to-end testing | todo |

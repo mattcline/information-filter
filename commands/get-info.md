@@ -167,5 +167,5 @@ Report that no items passed the scoring threshold. Suggest:
 
 List each failure with its remediation instructions. Common fixes:
 - `npm install` + `npx agent-browser install` for agent-browser issues
-- Session import instructions for auth issues (launch Chrome with `--remote-debugging-port=9222`, log in, then use `npx agent-browser --auto-connect state save` + `npx agent-browser --session-name <name> state load`)
+- Session import instructions for auth issues (launch Chrome with `--remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug-profile`, log in, then use `npx agent-browser --auto-connect state save` + `npx agent-browser --session-name <name> state load`)
 - Check network connectivity for API failures

@@ -11,7 +11,7 @@ X requires authentication for timeline access. Use agent-browser to log in, scro
 3. X session imported via browser:
    ```bash
    # Close all Chrome windows, then relaunch with remote debugging:
-   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222
+   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug-profile
 
    # In that Chrome window, navigate to x.com and log in normally
    # (handle 2FA, CAPTCHAs, etc. as you normally would)
@@ -50,7 +50,7 @@ The `--session-name x` flag restores saved cookies/state and auto-saves them bac
 ### Step 2a: Validate Auth
 
 After the page loads, check the current URL. If it contains `/login` or `/i/flow/login`, the session has expired. Skip X with the message:
-> "X/Twitter skipped — session expired. Re-import your session by launching Chrome with `--remote-debugging-port=9222`, logging in to x.com, then running `npx agent-browser --auto-connect state save /tmp/x-auth.json` followed by `npx agent-browser --session-name x state load /tmp/x-auth.json`."
+> "X/Twitter skipped — session expired. Re-import your session by launching Chrome with `--remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug-profile`, logging in to x.com, then running `npx agent-browser --auto-connect state save /tmp/x-auth.json` followed by `npx agent-browser --session-name x state load /tmp/x-auth.json`."
 
 ### Step 3: Scroll and Capture Timeline
 
@@ -169,7 +169,7 @@ For each X item that passes scoring:
 ## Error Handling
 
 - agent-browser not installed → skip with install instructions (see Step 1)
-- Session not configured → skip with message: "X/Twitter skipped — no session configured. Import your session by launching Chrome with `--remote-debugging-port=9222`, logging in to x.com, then running `npx agent-browser --auto-connect state save /tmp/x-auth.json` followed by `npx agent-browser --session-name x state load /tmp/x-auth.json`."
+- Session not configured → skip with message: "X/Twitter skipped — no session configured. Import your session by launching Chrome with `--remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug-profile`, logging in to x.com, then running `npx agent-browser --auto-connect state save /tmp/x-auth.json` followed by `npx agent-browser --session-name x state load /tmp/x-auth.json`."
 - Session expired (redirected to login page) → skip with re-import instructions (see Step 2a)
 - Timeline fails to load → report and skip
 - Individual account or list page fails → skip that account/list, continue with others
